@@ -1,30 +1,50 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
+using ApiApplication.Database.Repositories.Abstractions;
+using ApiApplication.Database.Repositories;
+using ApiApplication.Database;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Hosting;
 
-namespace ApiApplication
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.AddConsole();
+
+builder.Services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
+builder.Services.AddTransient<ITicketsRepository, TicketsRepository>();
+builder.Services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
+
+builder.Services.AddDbContext<CinemaContext>(options =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+    options.UseInMemoryDatabase("CinemaDb")
+        .EnableSensitiveDataLogging()
+        .ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+});
+builder.Services.AddControllers();
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.ConfigureLogging(options =>
-                    {
-                        options.AddConsole();
-                    });
-                    webBuilder.UseStartup<Startup>();                    
-                });
-    }
+builder.Services.AddHttpClient();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
 }
+
+app.UseHttpsRedirection();
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
+SampleData.Initialize(app);
+
+app.Run();
