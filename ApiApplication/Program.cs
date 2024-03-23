@@ -6,19 +6,31 @@ using ApiApplication.Database.Repositories;
 using ApiApplication.Database.Repositories.Abstractions;
 using ApiApplication.Domain.Movies.Abstractions;
 using ApiApplication.Infrastructure;
-using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using ProtoDefinitions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.AddConsole();
 
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: builder.Environment.ApplicationName))
+    .WithMetrics(metrics => metrics
+        .AddMeter("Microsoft.AspNetCore.Hosting")
+        .AddConsoleExporter((exporterOptions, metricReaderOptions) =>
+        {
+            metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 300_000;
+        }));
+
+//already has retry policy enabled with 5 attempts
 builder.Services.AddGrpcClient<MoviesApi.MoviesApiClient>(
     configuration =>
         {
@@ -42,7 +54,21 @@ builder.Services.AddGrpcClient<MoviesApi.MoviesApiClient>(
             return Task.CompletedTask;
         });
 
-builder.Services.AddTransient<IMoviesService, MoviesService>();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["Redis:ConnectionString"];
+    options.InstanceName = builder.Configuration["Redis:InstanceName"];
+});
+
+builder.Services.AddTransient<MoviesGrpcProvider, MoviesGrpcProvider>();
+builder.Services.Configure<MoviesProviderCacheDurationOptions>(
+    builder.Configuration.GetSection("MoviesService:CacheDurationMinutes")
+    );
+builder.Services.AddTransient<IMoviesProvider, MoviesProviderCacheDecorator>(
+    sf => ActivatorUtilities.CreateInstance<MoviesProviderCacheDecorator>(
+        sf,
+        sf.GetRequiredService<MoviesGrpcProvider>())
+    );
 
 builder.Services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
 builder.Services.AddTransient<ITicketsRepository, TicketsRepository>();
@@ -59,6 +85,17 @@ builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+    var watch = System.Diagnostics.Stopwatch.StartNew();
+    await next(context);
+    watch.Stop();
+
+    logger.LogInformation($"Request {context.Request.Method} {context.Request.Path} processed in {watch.ElapsedMilliseconds}ms with response code {context.Response.StatusCode}");
+});
 
 if (app.Environment.IsDevelopment())
 {

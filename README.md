@@ -67,16 +67,19 @@ docker-compose down
     - Expired reservations (older than 10 minutes) cannot be confirmed.
     - We are not going to use a Payment abstraction for this case, just have an Endpoint which I can use to Confirm a Reservation.
     
-### API communication with ProvidedApi
+[//]: <> (done)
+### API communication with ProvidedApi 
 
 You can use the HTTP API or the GRPC API, you should check the [Swagger](http://localhost:7172/swagger/index.html) for more info. We know that the GRPC implementation is faster. But it is not working right now. You can fix it and use it.
 
 The solution includes the proto of Provided API and a small piece of code that tries to connect with the GRPC API, but it does not work.
 
+[//]: <> (done differently)
 ### Cache
 
 We will like to have a cache layer to cache the response from the Provided API because the API is slow and fails a lot. We will like to call the API and in case of failure try to use the cached response. The cache should use the Redis container provided in the docker-compose.yaml
 
+[//]: <> (done)
 ### Execution Tracking
 
 We want to track the execution time of each request done to the service and log the time in the Console.
