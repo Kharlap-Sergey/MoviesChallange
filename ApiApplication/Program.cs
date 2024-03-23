@@ -1,20 +1,15 @@
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using ApiApplication.Database;
 using ApiApplication.Database.Repositories;
 using ApiApplication.Database.Repositories.Abstractions;
-using ApiApplication.Domain.Movies.Abstractions;
-using ApiApplication.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
-using ProtoDefinitions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,45 +25,19 @@ builder.Services.AddOpenTelemetry()
             metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 300_000;
         }));
 
-//already has retry policy enabled with 5 attempts
-builder.Services.AddGrpcClient<MoviesApi.MoviesApiClient>(
-    configuration =>
-        {
-            configuration.Address = new Uri(builder.Configuration["MoviesService:BaseUrl"]);
-        })
-    .ConfigureChannel(
-        configuration =>
-        {
-            var httpHandler = new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback =
-                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-            };
-            configuration.HttpHandler = httpHandler;
-        })
-    .AddCallCredentials(
-        (context, metadata) =>
-        {
-            metadata.Add("X-Apikey", builder.Configuration["MoviesService:X-Apikey"]);
-
-            return Task.CompletedTask;
-        });
-
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration["Redis:ConnectionString"];
     options.InstanceName = builder.Configuration["Redis:InstanceName"];
 });
 
-builder.Services.AddTransient<MoviesGrpcProvider, MoviesGrpcProvider>();
-builder.Services.Configure<MoviesProviderCacheDurationOptions>(
-    builder.Configuration.GetSection("MoviesService:CacheDurationMinutes")
-    );
-builder.Services.AddTransient<IMoviesProvider, MoviesProviderCacheDecorator>(
-    sf => ActivatorUtilities.CreateInstance<MoviesProviderCacheDecorator>(
-        sf,
-        sf.GetRequiredService<MoviesGrpcProvider>())
-    );
+builder.Services.AddMoviesGrpcProvider(
+    builder.Configuration["MoviesService:BaseUrl"],
+    builder.Configuration["MoviesService:X-Apikey"],
+    options =>
+    {
+        builder.Configuration.GetSection("MoviesService:CacheDurationMinutes").Bind(options);
+    });
 
 builder.Services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
 builder.Services.AddTransient<ITicketsRepository, TicketsRepository>();

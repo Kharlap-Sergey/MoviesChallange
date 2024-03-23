@@ -1,4 +1,4 @@
-﻿namespace ApiApplication.Domain.Movies;
+﻿namespace Domain.Movies;
 
 public class MovieModel
 {

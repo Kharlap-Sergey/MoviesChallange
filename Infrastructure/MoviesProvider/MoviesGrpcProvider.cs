@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ApiApplication.Domain.Movies;
-using ApiApplication.Domain.Movies.Abstractions;
+﻿using Domain.Movies;
+using Domain.Movies.Abstractions;
 using Grpc.Core;
 using ProtoDefinitions;
 
-namespace ApiApplication.Infrastructure;
+namespace Infrastructure.MoviesProvider;
 
 public class MoviesGrpcProvider : IMoviesProvider
 {
@@ -21,7 +18,7 @@ public class MoviesGrpcProvider : IMoviesProvider
 
     public async Task<MovieModel> GetById(string id)
     {
-        var result =  await Execute(
+        var result = await Execute(
                 _moviesApiClient.GetByIdAsync(new IdRequest { Id = id }
             ));
 
@@ -31,7 +28,7 @@ public class MoviesGrpcProvider : IMoviesProvider
 
     public async Task<List<MovieModel>> GetWithFilter(string searchFilter)
     {
-        var result =  await Execute(
+        var result = await Execute(
                 _moviesApiClient.SearchAsync(new SearchRequest { Text = searchFilter }
             ));
 

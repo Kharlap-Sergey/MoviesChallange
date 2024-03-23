@@ -1,4 +1,4 @@
-﻿namespace ApiApplication.Domain.Movies.Abstractions;
+﻿namespace Domain.Movies.Abstractions;
 
 public class MoviesProviderCacheDurationOptions
 {

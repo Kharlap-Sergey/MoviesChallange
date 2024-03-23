@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using ApiApplication.Domain.Exceptions;
+﻿using Domain.Exceptions;
 
-namespace ApiApplication.Infrastructure
+namespace Infrastructure.MoviesProvider
 {
     public class MoviesGrpcProviderException : DomainException
     {

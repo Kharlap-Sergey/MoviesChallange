@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using ApiApplication.Domain.Movies.Abstractions;
+using Domain.Movies.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiApplication.Controllers;

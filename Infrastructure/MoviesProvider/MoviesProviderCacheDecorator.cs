@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using ApiApplication.Domain.Movies;
-using ApiApplication.Domain.Movies.Abstractions;
+﻿using Domain.Movies;
+using Domain.Movies.Abstractions;
+using Infrastructure.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 
-namespace ApiApplication.Infrastructure;
+namespace Infrastructure.MoviesProvider;
 
 public class MoviesProviderCacheDecorator : IMoviesProvider
 {

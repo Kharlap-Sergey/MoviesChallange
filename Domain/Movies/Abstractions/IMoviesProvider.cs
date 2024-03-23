@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace ApiApplication.Domain.Movies.Abstractions;
+﻿namespace Domain.Movies.Abstractions;
 
 public interface IMoviesProvider
 {
