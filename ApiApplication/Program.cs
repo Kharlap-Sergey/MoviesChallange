@@ -1,6 +1,7 @@
 using ApiApplication.Database;
 using ApiApplication.Database.Repositories;
 using ApiApplication.Database.Repositories.Abstractions;
+using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -31,6 +32,9 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = builder.Configuration["Redis:InstanceName"];
 });
 
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Domain.Core.BaseEntity).Assembly));
+
 builder.Services.AddMoviesGrpcProvider(
     builder.Configuration["MoviesService:BaseUrl"],
     builder.Configuration["MoviesService:X-Apikey"],
@@ -39,9 +43,9 @@ builder.Services.AddMoviesGrpcProvider(
         builder.Configuration.GetSection("MoviesService:CacheDurationMinutes").Bind(options);
     });
 
-builder.Services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
-builder.Services.AddTransient<ITicketsRepository, TicketsRepository>();
-builder.Services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
+//builder.Services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
+//builder.Services.AddTransient<ITicketsRepository, TicketsRepository>();
+//builder.Services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
 
 builder.Services.AddDbContext<CinemaContext>(options =>
 {
@@ -49,6 +53,14 @@ builder.Services.AddDbContext<CinemaContext>(options =>
         .EnableSensitiveDataLogging()
         .ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 });
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseInMemoryDatabase("AppDb")
+        .EnableSensitiveDataLogging()
+        .ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+});
+builder.Services.AddPersistence();
+
 builder.Services.AddControllers();
 
 builder.Services.AddHttpClient();
@@ -83,5 +95,6 @@ app.UseEndpoints(endpoints =>
 });
 
 SampleData.Initialize(app);
+SampleDataSeed.Initialize(app);
 
 app.Run();

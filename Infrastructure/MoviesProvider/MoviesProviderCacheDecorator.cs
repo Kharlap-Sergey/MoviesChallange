@@ -1,5 +1,5 @@
-﻿using Domain.Movies;
-using Domain.Movies.Abstractions;
+﻿using Domain.Abstractions;
+using Domain.Entities;
 using Infrastructure.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
@@ -22,7 +22,7 @@ public class MoviesProviderCacheDecorator : IMoviesProvider
         _cache = cache;
         _options = options;
     }
-    public Task<List<MovieModel>> GetAll()
+    public Task<List<MovieEntity>> GetAll()
     {
         string key = $"{typeof(MoviesProviderCacheDecorator).FullName}.{nameof(GetAll)}";
 
@@ -32,17 +32,17 @@ public class MoviesProviderCacheDecorator : IMoviesProvider
             _options.Value.GetAll);
     }
 
-    public Task<MovieModel> GetById(string id)
+    public Task<MovieEntity> GetById(string id, CancellationToken cancellationToken)
     {
         string key = $"{typeof(MoviesProviderCacheDecorator).FullName}.{nameof(GetById)}_{id}";
 
         return _cache.GetOrSet(
             key,
-            async () => await _moviesProvider.GetById(id),
+            async () => await _moviesProvider.GetById(id, cancellationToken),
             _options.Value.GetById);
     }
 
-    public Task<List<MovieModel>> GetWithFilter(string searchFilter)
+    public Task<List<MovieEntity>> GetWithFilter(string searchFilter)
     {
         string key = $"{typeof(MoviesProviderCacheDecorator).FullName}.{nameof(GetWithFilter)}_{searchFilter}";
 

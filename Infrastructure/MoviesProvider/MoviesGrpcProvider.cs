@@ -1,5 +1,5 @@
-﻿using Domain.Movies;
-using Domain.Movies.Abstractions;
+﻿using Domain.Abstractions;
+using Domain.Entities;
 using Grpc.Core;
 using ProtoDefinitions;
 
@@ -16,17 +16,19 @@ public class MoviesGrpcProvider : IMoviesProvider
         _moviesApiClient = moviesApiClient;
     }
 
-    public async Task<MovieModel> GetById(string id)
+    public async Task<MovieEntity> GetById(string id, CancellationToken cancellationToken)
     {
         var result = await Execute(
-                _moviesApiClient.GetByIdAsync(new IdRequest { Id = id }
-            ));
+                _moviesApiClient.GetByIdAsync(
+                    new IdRequest { Id = id },
+                    cancellationToken: cancellationToken)
+                );
 
         var data = result.Data.Unpack<showResponse>();
         return MapToDomainModel(data);
     }
 
-    public async Task<List<MovieModel>> GetWithFilter(string searchFilter)
+    public async Task<List<MovieEntity>> GetWithFilter(string searchFilter)
     {
         var result = await Execute(
                 _moviesApiClient.SearchAsync(new SearchRequest { Text = searchFilter }
@@ -37,7 +39,7 @@ public class MoviesGrpcProvider : IMoviesProvider
         return data.Shows.Select(MapToDomainModel).ToList();
     }
 
-    public async Task<List<MovieModel>> GetAll()
+    public async Task<List<MovieEntity>> GetAll()
     {
         var result = await Execute(
                 _moviesApiClient.GetAllAsync(new Empty())
@@ -67,9 +69,9 @@ public class MoviesGrpcProvider : IMoviesProvider
 
         return result;
     }
-    private MovieModel MapToDomainModel(showResponse show)
+    private MovieEntity MapToDomainModel(showResponse show)
     {
-        return new MovieModel
+        return new MovieEntity
         {
             Id = show.Id,
             Rank = show.Rank,
