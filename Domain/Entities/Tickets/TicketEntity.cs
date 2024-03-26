@@ -8,7 +8,7 @@ namespace Domain.Entities.Tickets;
 
 public class TicketEntity : Entity<Guid>
 {
-    public static TimeSpan DefaultExpiresIn = TimeSpan.FromMinutes(1);
+    public static TimeSpan DefaultExpiresIn = TimeSpan.FromMinutes(10);
 
     public TicketStatus Status { get; private set; }
 
@@ -22,7 +22,29 @@ public class TicketEntity : Entity<Guid>
 
     public TicketEntity()
     {
+    }
 
+    public TicketEntity(
+        Guid? id = null,
+        IEnumerable<Seat>? seats = null,
+        ShowTimeEntity? showtime = null,
+        TicketStatus? status = null,
+        DateTime? createdTime = null,
+        Guid? paymentId = null
+        )
+    {
+        if(id.HasValue)
+            Id = id.Value;
+        if(seats != null)
+            Seats = seats;
+        if(showtime != null)
+            Showtime = showtime;
+        if(status != null)
+            Status = status;
+        if(createdTime.HasValue)
+            CreatedTime = createdTime.Value;
+        if(paymentId.HasValue)
+            PaymentId = paymentId.Value;
     }
 
     public TicketEntity(IEnumerable<Seat> seats, ShowTimeEntity showtimeEntity)

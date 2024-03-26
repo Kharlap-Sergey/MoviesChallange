@@ -1,2 +1,37 @@
 Please add the cURLs of your tests here:
 
+//reserve a seat
+//send twice
+curl --location --request PATCH 'https://localhost:7629/api/showtimes/b80013f4-7ee5-4292-a397-82b577de6502/reserve' \
+--header 'Content-Type: application/json' \
+--data '[
+    {
+        "Row": 1,
+        "SeatNumber": 2
+    }
+]'
+
+//confirm payment 
+//send twice
+curl --location 'https://localhost:7629/api/reservations/b80013f4-7ee5-1111-a397-82b577de6502/confirm' \
+--header 'Content-Type: application/json' \
+--data '"b80013f4-7ee5-4292-a397-82b577de6502"'
+
+
+//for docer compose 
+//reserve a seat
+//send twice
+curl --location --request PATCH 'http://localhost:7173/api/showtimes/b80013f4-7ee5-4292-a397-82b577de6502/reserve' \
+--header 'Content-Type: application/json' \
+--data '[
+    {
+        "Row": 1,
+        "SeatNumber": 2
+    }
+]'
+
+//confirm payment 
+//send twice
+curl --location 'http://localhost:7173/api/reservations/b80013f4-7ee5-1111-a397-82b577de6502/confirm' \
+--header 'Content-Type: application/json' \
+--data '"b80013f4-7ee5-4292-a397-82b577de6502"'

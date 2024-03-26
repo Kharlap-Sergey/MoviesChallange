@@ -1,5 +1,6 @@
 ﻿using Domain.Entities.Auditorium;
 using Domain.Entities.ShowTimes;
+using Domain.Entities.Tickets;
 using Domain.ValueObjects;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
@@ -22,12 +23,24 @@ namespace ApiApplication.Database
                 )
             );
 
-            context.Showtimes.Add(
-                new ShowTimeEntity(
+            var showtime = new ShowTimeEntity(
                     DateTime.UtcNow.AddDays(1),
                     "ID-test1",
                     1,
                     Guid.Parse("b80013f4-7ee5-4292-a397-82b577de6502")
+                    );
+
+            context.Showtimes.Add(
+                    showtime
+                );
+
+            context.Tickets.Add(
+                new TicketEntity(
+                    Guid.Parse("b80013f4-7ee5-1111-a397-82b577de6502"),
+                    new List<Seat> { new Seat(1, 1) },
+                    showtime,
+                    TicketStatus.Pending,
+                    DateTime.UtcNow
                     )
                 );
 

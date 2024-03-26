@@ -15,7 +15,7 @@ public class ShowTimeEntity : Entity<Guid>
 
     public int AuditoriumId { get; private set; }
 
-    private readonly List<TicketEntity> _tickets = new();
+    private readonly List<TicketEntity> _tickets;
 
     public IReadOnlyCollection<TicketEntity> Tickets => _tickets;
     
@@ -28,13 +28,15 @@ public class ShowTimeEntity : Entity<Guid>
         DateTime date,
         string movieId,
         int auditoriumId,
-        Guid? id = null
+        Guid? id = null,
+        List<TicketEntity> tickets = null
         )
     {
         SessionDate = date;
         MovieId = movieId;
         AuditoriumId = auditoriumId;
         Id = id ?? Guid.NewGuid();
+        _tickets = tickets ?? new List<TicketEntity>();
     }
 
 

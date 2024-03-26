@@ -44,7 +44,7 @@ public class AuditoriumEntity : Entity<int>
             );
     }
 
-    public bool IsSeatsContiguous(IEnumerable<Seat> seats)
+    public virtual bool IsSeatsContiguous(IEnumerable<Seat> seats)
     {
         var sortedSeats = seats.OrderBy(s => s.Row).ThenBy(s => s.SeatNumber).ToList();
         for (var i = 1; i < sortedSeats.Count; i++)

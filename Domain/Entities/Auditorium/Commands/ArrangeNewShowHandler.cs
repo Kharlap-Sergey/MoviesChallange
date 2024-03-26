@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Domain.Entities.Auditorium.Commands;
 
-internal class ArrangeNewShowHandler
+public class ArrangeNewShowHandler
     : IRequestHandler<ArrangeNewShowCommand>
 {
     private readonly IAuditoriumRepository _auditoriumRepository;
