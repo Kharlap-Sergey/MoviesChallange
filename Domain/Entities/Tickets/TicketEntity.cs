@@ -1,13 +1,14 @@
 ﻿using Domain.Core;
 using Domain.Entities.ShowTimes;
 using Domain.Events;
+using Domain.Exceptions;
 using Domain.ValueObjects;
 
 namespace Domain.Entities.Tickets;
 
 public class TicketEntity : Entity<Guid>
 {
-    public static TimeSpan DefaultExpiresIn = TimeSpan.FromMinutes(10);
+    public static TimeSpan DefaultExpiresIn = TimeSpan.FromMinutes(1);
 
     public TicketStatus Status { get; private set; }
 
@@ -33,16 +34,6 @@ public class TicketEntity : Entity<Guid>
         Showtime = showtimeEntity;
     }
 
-    public bool IsValid()
-    {
-        if (Status != TicketStatus.Pending && Status != TicketStatus.Paid)
-        {
-            return false;
-        }
-
-        return !IsExpired();
-    }
-
     public bool IsExpired()
     {
         if (Status == TicketStatus.Pending)
@@ -57,18 +48,21 @@ public class TicketEntity : Entity<Guid>
     {
         if (Status != TicketStatus.Pending)
         {
-            throw new InvalidOperationException("Only Pending tickets could be expired");
+            throw new InvalidOperationDomainException("Only Pending tickets could be expired");
         }
 
-        Status = TicketStatus.Expired;
+        if (!IsExpired())
+            return;
 
+        Status = TicketStatus.Expired;
+        AddDomainEvent(new TicketExpiredDomainEvent(Id, Seats));
     }
 
     public void ConfirmPayment(Guid paymentId)
     {
         if (Status != TicketStatus.Pending)
         {
-            throw new InvalidOperationException("Only Pending tickets could be paid");
+            throw new InvalidOperationDomainException("Only Pending tickets could be paid");
         }
 
         PaymentId = paymentId;

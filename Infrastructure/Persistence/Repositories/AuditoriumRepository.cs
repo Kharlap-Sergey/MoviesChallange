@@ -23,7 +23,6 @@ public class AuditoriumRepository
     {
         return context.Auditoriums
                 .Include(x => x.Seats)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id, token);
     }
 

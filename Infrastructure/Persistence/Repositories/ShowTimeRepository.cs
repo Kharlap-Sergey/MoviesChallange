@@ -30,14 +30,11 @@ public class ShowTimeRepository : BaseRepository, IShowTimeRepository
         await DispatchDomainEventsAsync(ShowTimeEntity, cancellationToken);
     }
 
-    public Task DeleteShowTimeAsync(ShowTimeEntity ShowTimeEntity, CancellationToken cancellationToken)
+    public async Task<ShowTimeEntity> GetShowTimeByIdAsync(Guid showTimeId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<ShowTimeEntity> GetShowTimeByIdAsync(Guid showTimeId, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
+        return await _context.Showtimes
+            .Include(st => st.Tickets)
+            .FirstOrDefaultAsync(st => st.Id == showTimeId);
     }
 
     public async Task<IEnumerable<ShowTimeEntity>> GetShowTimesAsync(
@@ -66,8 +63,12 @@ public class ShowTimeRepository : BaseRepository, IShowTimeRepository
         return shows;
     }
 
-    public Task UpdateShowTimeAsync(ShowTimeEntity ShowTimeEntity, CancellationToken cancellationToken)
+    public async Task UpdateShowTimeAsync(ShowTimeEntity ShowTimeEntity, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        _context.Showtimes.Update(ShowTimeEntity);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        await DispatchDomainEventsAsync(ShowTimeEntity, cancellationToken);
     }
 }

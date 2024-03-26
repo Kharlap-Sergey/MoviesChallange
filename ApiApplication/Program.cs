@@ -1,8 +1,9 @@
+using System;
 using ApiApplication.Database;
-using ApiApplication.Database.Repositories;
-using ApiApplication.Database.Repositories.Abstractions;
+using Domain.Exceptions;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -43,16 +44,6 @@ builder.Services.AddMoviesGrpcProvider(
         builder.Configuration.GetSection("MoviesService:CacheDurationMinutes").Bind(options);
     });
 
-//builder.Services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
-//builder.Services.AddTransient<ITicketsRepository, TicketsRepository>();
-//builder.Services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
-
-builder.Services.AddDbContext<CinemaContext>(options =>
-{
-    options.UseInMemoryDatabase("CinemaDb")
-        .EnableSensitiveDataLogging()
-        .ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-});
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseInMemoryDatabase("AppDb")
@@ -83,6 +74,18 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next(context);
+    }
+    catch(InvalidOperationDomainException ex)
+    {
+        await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+    }
+});
+
 app.UseHttpsRedirection();
 
 app.UseRouting();
@@ -94,7 +97,6 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
 });
 
-SampleData.Initialize(app);
 SampleDataSeed.Initialize(app);
 
 app.Run();

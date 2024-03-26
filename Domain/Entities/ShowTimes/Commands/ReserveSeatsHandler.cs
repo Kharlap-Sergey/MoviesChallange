@@ -6,13 +6,16 @@ public class ReserveSeatsHandler : IRequestHandler<ReserveSeatsCommand, ReserveS
 {
     private readonly IShowTimeRepository _showTimeRepository;
     private readonly IAuditoriumRepository _auditoriumRepository;
+    private readonly IMoviesProvider _moviesProvider;
 
     public ReserveSeatsHandler(
         IShowTimeRepository showTimeRepository,
-        IAuditoriumRepository auditoriumRepository)
+        IAuditoriumRepository auditoriumRepository,
+        IMoviesProvider moviesProvider)
     {
         _showTimeRepository = showTimeRepository;
         _auditoriumRepository = auditoriumRepository;
+        _moviesProvider = moviesProvider;
     }
 
     public async Task<ReserveSeatsCommandData> Handle(
@@ -34,12 +37,13 @@ public class ReserveSeatsHandler : IRequestHandler<ReserveSeatsCommand, ReserveS
             auditorium!
             );
 
+        var movie = await _moviesProvider.GetById(showTime.MovieId, cancellationToken);
         await _showTimeRepository.UpdateShowTimeAsync(showTime, cancellationToken);
         
         return new ReserveSeatsCommandData(
             reservation,
             request.Seats,
-            showTime.MovieId,
+            movie,
             showTime.AuditoriumId
             );
     }

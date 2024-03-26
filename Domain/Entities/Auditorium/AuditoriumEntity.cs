@@ -1,5 +1,6 @@
 ﻿using Domain.Core;
 using Domain.Events;
+using Domain.Exceptions;
 using Domain.ValueObjects;
 
 namespace Domain.Entities.Auditorium;
@@ -35,7 +36,7 @@ public class AuditoriumEntity : Entity<int>
 
         if (start < DateTime.UtcNow)
         {
-            throw new ArgumentException("Start time must be in the future");
+            throw new InvalidOperationDomainException("Start time must be in the future");
         }
 
         AddDomainEvent(

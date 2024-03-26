@@ -2,6 +2,7 @@
 using Domain.Entities.Auditorium;
 using Domain.Entities.Tickets;
 using Domain.Events;
+using Domain.Exceptions;
 using Domain.ValueObjects;
 
 namespace Domain.Entities.ShowTimes;
@@ -26,13 +27,14 @@ public class ShowTimeEntity : Entity<Guid>
     public ShowTimeEntity(
         DateTime date,
         string movieId,
-        int auditoriumId
+        int auditoriumId,
+        Guid? id = null
         )
     {
         SessionDate = date;
         MovieId = movieId;
         AuditoriumId = auditoriumId;
-        Id = Guid.NewGuid();
+        Id = id ?? Guid.NewGuid();
     }
 
 
@@ -44,12 +46,12 @@ public class ShowTimeEntity : Entity<Guid>
         //ensure all seats are contiguous
         if (!auditorium.IsSeatsContiguous(seats))
         {
-            throw new InvalidOperationException("Seats are not contiguous");
+            throw new InvalidOperationDomainException("Seats are not contiguous");
         };
 
         var unavailableSeats = new HashSet<Seat>(
                 _tickets
-                    .Where(ticket => ticket.IsValid())
+                    .Where(ticket => !ticket.IsExpired())
                     .SelectMany(ticket => ticket.Seats)
                 );
 
@@ -58,7 +60,7 @@ public class ShowTimeEntity : Entity<Guid>
         {
             if (unavailableSeats.Contains(seat))
             {
-                throw new InvalidOperationException("Seat is not available");
+                throw new InvalidOperationDomainException("Seat is not available");
             }
         }
 

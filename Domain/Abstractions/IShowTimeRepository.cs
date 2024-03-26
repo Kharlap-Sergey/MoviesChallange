@@ -15,5 +15,4 @@ public interface IShowTimeRepository
 
     Task AddShowTimeAsync(ShowTimeEntity ShowTimeEntity, CancellationToken cancellationToken);
     Task UpdateShowTimeAsync(ShowTimeEntity ShowTimeEntity, CancellationToken cancellationToken);
-    Task DeleteShowTimeAsync(ShowTimeEntity ShowTimeEntity, CancellationToken cancellationToken);
 }

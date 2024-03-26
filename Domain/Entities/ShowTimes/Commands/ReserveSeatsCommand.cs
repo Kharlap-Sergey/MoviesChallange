@@ -12,6 +12,6 @@ public record ReserveSeatsCommand(
 public record ReserveSeatsCommandData(
     Guid reservationId,
     IEnumerable<Seat> seats,
-    string MovieId,
+    MovieEntity Movie,
     int AuditoriumId
     );

@@ -2,7 +2,7 @@
 
 namespace Domain.Entities.Tickets.Commands;
 
-public record PaymentConfirmedCommand(
+public record ConfirmPaymentCommand(
     Guid TicketId,
     Guid PaymentId
     )

@@ -1,22 +1,27 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Domain.Abstractions;
 using Domain.Entities.Auditorium.Commands;
+using Domain.Entities.ShowTimes.Commands;
 using Domain.Entities.ShowTimes.Queries;
+using Domain.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiApplication.Controllers;
 
-[Route("api/[controller]/[action]")]
+[Route("api/[controller]")]
 [ApiController]
-public class TestController : ControllerBase
+public class ShowTimesController : ControllerBase
 {
     private readonly IMoviesProvider _moviesService;
     private readonly IMediator _mediator;
 
-    public TestController(
-        IMoviesProvider moviesService, 
+    public ShowTimesController(
+        IMoviesProvider moviesService,
         IMediator mediator
         )
     {
@@ -50,5 +55,36 @@ public class TestController : ControllerBase
             ));
 
         return shows;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateShowTime(
+        string movieId,
+        DateTime dateTime,
+        int auditoriumId
+        )
+    {
+        var showTimeCommand = new ArrangeNewShowCommand(
+            movieId.ToString(),
+            dateTime,
+            auditoriumId
+            );
+
+        await _mediator.Send(showTimeCommand);
+        return Ok();
+    }
+
+    [HttpPatch("{showtimeId}/reserve")]
+    public async Task<IActionResult> ReserveSeats(
+        Guid showtimeId,
+        [FromBody] IEnumerable<Seat> seats)
+    {
+        var reserveSeatsCommand = new ReserveSeatsCommand(
+            showtimeId,
+            seats);
+
+        var result = await _mediator.Send(reserveSeatsCommand);
+        
+        return Ok(result);
     }
 }

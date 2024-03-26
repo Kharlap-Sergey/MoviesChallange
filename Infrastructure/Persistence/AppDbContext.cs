@@ -30,18 +30,15 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(entry => entry.AuditoriumId);
 
-            build.Property(entry => entry.Tickets)
-                .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-            //var navigation 
-            //    = build.Metadata.FindNavigation(nameof(ShowTimeEntity.Tickets));
-            //navigation!.SetPropertyAccessMode(PropertyAccessMode.Field);
+            var navigation
+                = build.Metadata.FindNavigation(nameof(ShowTimeEntity.Tickets));
+            navigation!.SetPropertyAccessMode(PropertyAccessMode.Field);
         });
 
         modelBuilder.Entity<TicketEntity>(build =>
         {
             build.HasKey(entry => entry.Id);
-
+            build.Property(entry => entry.Id).ValueGeneratedNever();
             build.OwnsOne(entry => entry.Status);
             build.OwnsMany(entity => entity.Seats);
         });

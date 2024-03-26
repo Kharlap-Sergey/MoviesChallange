@@ -25,22 +25,9 @@ namespace ApiApplication.Database
             context.Showtimes.Add(
                 new ShowTimeEntity(
                     DateTime.UtcNow.AddDays(1),
-                    "2134",
-                    //new MovieEntity
-                    //{
-                    //    Id  = "2134",
-                    //    Title = "Inception",
-                    //    //fill with random data fields 
-                    //    //use MovieEntity for context
-                    //    Crew = "Christopher Nolan",
-                    //    FullTitle = "Inception",
-                    //    ImDbRating = "8.8",
-                    //    ImDbRatingCount = "2,000,000",
-                    //    Image = "adfasdfa",
-                    //    Rank = "1",
-                    //    Year = "2010"
-                    //},
-                    1
+                    "ID-test1",
+                    1,
+                    Guid.Parse("b80013f4-7ee5-4292-a397-82b577de6502")
                     )
                 );
 
