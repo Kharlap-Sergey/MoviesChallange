@@ -1,20 +1,7 @@
 ## Movies challenge
-Welcome to the tech challenge for Lodgify’s Backend developers candidates.
-
----
-
-Please follow the instructions included here. When you are finished, zip it, use a cloud service to upload it and send the link to us by **email**.
-(Remeber to set the zip file permission to **Read-only to anyone**, we suggest Google Drive, but Dropbox, OneDrive, etc is also ok.)
-
-Thank you and good luck!
-
 ---
 
 ## Context
-
-We want a C# .Net Core Web Application API project that meets our requirements. We provide you with the solution skeleton and a few features implemented to save time.
-
-You will find the Data layer is implemented and is instructed to be an In-Memory Database. 
 
 The application represents a Cinema. We want to manage the showtimes of the cinema, getting some data from the **[Provided API](http://localhost:7172/swagger/index.html).**
 
